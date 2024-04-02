@@ -121,6 +121,7 @@ runs:
         fi
 
         echo "control_exports=$exports" >> $GITHUB_OUTPUT
+        echo "benchmark_exports=$exports" >> $GITHUB_OUTPUT
         echo "summary_file_pattern=*$date*.md" >> $GITHUB_OUTPUT
         echo "artifact_paths<<EOF" >> $GITHUB_OUTPUT
         echo "$paths" >> $GITHUB_OUTPUT

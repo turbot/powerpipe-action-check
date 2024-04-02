@@ -72,7 +72,7 @@ jobs:
         uses: ./ # This points to your local action
         with:
           mod-url: "https://github.com/turbot/steampipe-mod-aws-compliance"
-          controls: |
+          benchmarks: |
             cis_v150
           pipes-snapshot-visibility: 'anyone_with_link'
           pipes-token: "${{ secrets.PIPES_TOKEN }}"
