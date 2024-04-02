@@ -69,6 +69,7 @@ runs:
         cd -
 
     - name: Get Powerpipe control names
+      if: inputs.controls != ''
       id: get-controls
       shell: bash
       run: |
@@ -82,6 +83,7 @@ runs:
         echo "run_list=$run_list" >> $GITHUB_OUTPUT
 
     - name: Get Powerpipe benchmark names
+      if: inputs.benchmarks != ''
       id: get-benchmarks
       shell: bash
       run: |
@@ -125,6 +127,7 @@ runs:
         echo "EOF" >> $GITHUB_OUTPUT
 
     - name: Run Powerpipe control
+      if: steps.get-controls.outputs.run_list != ''
       id: run-controls
       shell: bash
       env:
@@ -171,6 +174,74 @@ runs:
 
         # Run control command
         powerpipe control run ${{ steps.get-controls.outputs.run_list }} $control_output $control_exports --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log
+        exit_code=$?
+
+        # Write summary
+        snapshot_url=$(cat /tmp/output.log | grep "Snapshot uploaded" | sed -e "s/^Snapshot uploaded to //")
+        if [ -n "$snapshot_url" ];then
+          echo "> Turbot Pipes ${{ inputs.pipes-snapshot-visibility }} snapshot(s)" >> $GITHUB_STEP_SUMMARY
+          echo "> $snapshot_url" >> $GITHUB_STEP_SUMMARY
+        fi
+        for f in $(echo "${{ steps.export-paths.outputs.summary_file_pattern }}")
+        do
+          echo "$(cat $f)" >> $GITHUB_STEP_SUMMARY
+        done
+
+        # Handle exit code: 0 ok, 1 alarms, 2 errors, these should exit ok - other codes should exit out with error code
+        if [[ $exit_code -le 2 ]];then
+          exit 0
+        else
+          exit $exit_code
+        fi
+
+    - name: Run Powerpipe benchmark
+      if: steps.get-benchmarks.outputs.run_list != ''
+      id: run-benchmarks
+      shell: bash
+      env:
+        STEAMPIPE_CHECK_DISPLAY_WIDTH: "120"
+        STEAMPIPE_DISPLAY_WIDTH: "120"
+      run: |
+        set +e
+        # Set outputs for artifact naming
+        echo "uuid=$(echo $RANDOM | md5sum | head -c 20)" >> $GITHUB_OUTPUT
+        echo "mod=$(echo ${{ inputs.mod-url }} | rev | cut -d '/' -f 1 | rev)" >> $GITHUB_OUTPUT
+
+        # Set workflow_id / run_url for later use
+        workflow_id=$(echo $GITHUB_WORKFLOW | sed -e "s/ /_/g")
+        run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+        # Clear snapshot flags from additional args (should be via input)
+        additional_args=$(echo "${{ inputs.benchmark-additional-args }}" | sed -e "s/--share//g" | sed -e "s/--snapshot//g")
+
+        # Allow override for output if set in benchmark-additional-args
+        benchmark_output="--output=brief"
+        if [[ "${{ inputs.benchmark-additional-args }}" == *"--output"* ]]; then
+          benchmark_output=""
+        fi
+
+        # Set export types
+        benchmark_exports="${{ steps.export-paths.outputs.benchmark_exports }}"
+
+        # Snapshot setup
+        snapshot_type=""
+        snapshot_tags="--snapshot-tag github_repo=$GITHUB_REPOSITORY --snapshot-tag github_run_url=$run_url --snapshot-tag github_workflow=$workflow_id"
+        pipes_inputs=""
+        if [[ -n "${{ inputs.pipes-token }}" ]];then
+          pipes_inputs="--pipes-host pipes.turbot.com --pipes-token ${{ inputs.pipes-token }}"
+        fi
+
+        if [ "${{ inputs.pipes-snapshot-visibility }}" == "anyone_with_link" ];then
+          snapshot_type="--share $snapshot_tags"
+        elif [ "${{ inputs.pipes-snapshot-visibility }}" == "workspace" ];then
+          snapshot_type="--snapshot $snapshot_tags"
+        elif [[ -n "${{ inputs.pipes-snapshot-visibility }}" ]];then
+          echo "Error: invalid value for input 'snapshot-visibility' provided: ${{ inputs.pipes-snapshot-visibility }} - valid values are 'anyone_with_link' and 'workspace'"
+          exit 3
+        fi
+
+        # Run benchmark command
+        powerpipe benchmark run ${{ steps.get-benchmarks.outputs.run_list }} $benchmark_output $benchmark_exports --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log
         exit_code=$?
 
         # Write summary
