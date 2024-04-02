@@ -1,0 +1,43 @@
+name: Test Workflow
+
+on: [push]
+
+jobs:
+  run_control:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Steampipe
+        uses: turbot/steampipe-action-setup@v1
+        with:
+          plugin-connections: |
+            connection "aws" {
+              plugin     = "aws"
+              access_key = "${{ secrets.AWS_ACCESS_KEY_ID }}"
+              secret_key = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+              regions    = ["ap-south-1"]
+            }
+
+      - name: Install Powerpipe
+        run: |
+          sudo /bin/sh -c "$(curl -fsSL https://powerpipe.io/install/powerpipe.sh)"
+
+      - name: Run
+        run: |
+          steampipe -v
+          powerpipe -v
+          steampipe service start
+
+      - name: Run Control
+        uses: ./ # This points to your local action
+        with:
+          mod-url: "https://github.com/turbot/steampipe-mod-aws-compliance"
+          controls: |
+            cis_v140_1_2
+          pipes-snapshot-visibility: 'anyone_with_link'
+          pipes-token: "${{ secrets.PIPES_TOKEN }}"
+
+      - name: Stop
+        run: |
+          steampipe service stop --force
