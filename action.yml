@@ -274,3 +274,20 @@ runs:
         name: ${{ steps.run-controls.outputs.mod }}-${{ steps.run-controls.outputs.uuid }}
         path: |
           ${{ steps.export-paths.outputs.artifact_paths }}
+
+    - name: Setup Node
+      uses: actions/setup-node@v3
+
+    - name: Create annotations(controls)
+      shell: bash
+      run: |
+        node ${{ github.action_path }}/dist/index.js ${{ steps.get-controls.outputs.run_list }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+
+    - name: Create annotations(benchmarks)
+      shell: bash
+      run: |
+        node ${{ github.action_path }}/dist/index.js ${{ steps.get-benchmarks.outputs.run_list }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
