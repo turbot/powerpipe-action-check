@@ -81,7 +81,7 @@ jobs:
         run: |
           steampipe service stop --force
 
-  run_duckdb_backend:
+  test_database_flag:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
