@@ -80,3 +80,30 @@ jobs:
       - name: Stop
         run: |
           steampipe service stop --force
+
+  run_duckdb_backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Powerpipe
+        run: |
+          sudo /bin/sh -c "$(curl -fsSL https://powerpipe.io/install/powerpipe.sh)"
+
+      - name: Run
+        run: |
+          powerpipe -v
+
+      - name: Run Control
+        uses: ./ # This points to your local action
+        with:
+          mod-url: "https://github.com/pskrbasu/powerpipe-mod-duckdb-demo"
+          controls: |
+            testing_control
+          pipes-snapshot-visibility: 'anyone_with_link'
+          pipes-token: "tpt_cnnggphtvnqvvaebj9j0_p8j3x6ij79js4ny8po8r6vz5"
+          database: "duckdb:///$(pwd)/test_data/employee.duckdb"
+
+      - name: Stop
+        run: |
+          steampipe service stop --force
