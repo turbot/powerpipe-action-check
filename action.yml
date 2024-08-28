@@ -20,6 +20,9 @@ inputs:
   benchmarks:
     description: Space separated list of benchmarks to run. Can also pass in as a multi-line string.
     required: false
+  database:
+    description: Database connection string to use for running controls and benchmarks.
+    required: false
   pipes-snapshot-visibility:
     description: Set this to 'anyone_with_link' or 'workspace' to create a snapshot in Turbot Pipes with the specified visibility.
     required: false
