@@ -103,7 +103,3 @@ jobs:
           pipes-snapshot-visibility: 'anyone_with_link'
           pipes-token: "tpt_cnnggphtvnqvvaebj9j0_p8j3x6ij79js4ny8po8r6vz5"
           database: "duckdb:///$(pwd)/test_data/employee.duckdb"
-
-      - name: Stop
-        run: |
-          steampipe service stop --force
