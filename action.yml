@@ -257,7 +257,12 @@ runs:
         fi
 
         # Run benchmark command
-        powerpipe benchmark run ${{ steps.get-benchmarks.outputs.run_list }} $benchmark_output $benchmark_exports --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log
+        if [[ -n "${{ steps.get-database.outputs.database }}" ]]; then
+          powerpipe benchmark run ${{ steps.get-benchmarks.outputs.run_list }} $benchmark_output $benchmark_exports --database=${{ steps.get-database.outputs.database }} --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log
+        else
+          powerpipe benchmark run ${{ steps.get-benchmarks.outputs.run_list }} $benchmark_output $benchmark_exports --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log
+        fi
+        
         exit_code=$?
 
         # Write summary
