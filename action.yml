@@ -20,9 +20,6 @@ inputs:
   benchmarks:
     description: Space separated list of benchmarks to run. Can also pass in as a multi-line string.
     required: false
-  database:
-    description: Database connection string to use for running controls and benchmarks.
-    required: false
   pipes-snapshot-visibility:
     description: Set this to 'anyone_with_link' or 'workspace' to create a snapshot in Turbot Pipes with the specified visibility.
     required: false
@@ -98,13 +95,6 @@ runs:
         ${{ inputs.benchmarks }}
         EOF
         echo "run_list=$run_list" >> $GITHUB_OUTPUT
-
-    - name: Get database connection string
-      if: inputs.database != ''
-      id: get-database
-      shell: bash
-      run: |
-        echo "database=${{ inputs.database }}" >> $GITHUB_OUTPUT
 
     - name: Parse exports and artifact paths
       id: export-paths
@@ -184,11 +174,8 @@ runs:
         fi
 
         # Run control command
-        if [[ -n "${{ steps.get-database.outputs.database }}" ]]; then
-          powerpipe control run ${{ steps.get-controls.outputs.run_list }} $control_output $control_exports --database=${{ steps.get-database.outputs.database }} --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log
-        else
-          powerpipe control run ${{ steps.get-controls.outputs.run_list }} $control_output $control_exports --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log
-        fi
+        powerpipe control run ${{ steps.get-controls.outputs.run_list }} $control_output $control_exports --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log
+        exit_code=$?
 
         # Write summary
         snapshot_url=$(cat /tmp/output.log | grep "Snapshot uploaded" | sed -e "s/^Snapshot uploaded to //")
@@ -255,11 +242,8 @@ runs:
         fi
 
         # Run benchmark command
-        if [[ -n "${{ steps.get-database.outputs.database }}" ]]; then
-          powerpipe benchmark run ${{ steps.get-benchmarks.outputs.run_list }} $benchmark_output $benchmark_exports --database=${{ steps.get-database.outputs.database }} --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log
-        else
-          powerpipe benchmark run ${{ steps.get-benchmarks.outputs.run_list }} $benchmark_output $benchmark_exports --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log
-        fi
+        powerpipe benchmark run ${{ steps.get-benchmarks.outputs.run_list }} $benchmark_output $benchmark_exports --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log
+        exit_code=$?
 
         # Write summary
         snapshot_url=$(cat /tmp/output.log | grep "Snapshot uploaded" | sed -e "s/^Snapshot uploaded to //")
