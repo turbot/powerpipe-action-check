@@ -22,7 +22,7 @@ See [action.yml](action.yml).
 
 ```yaml
   - name: Checkout repo
-    uses: actions/checkout@v3
+    uses: actions/checkout@v4
 
   - name: Setup/install Steampipe
     uses: turbot/steampipe-action-setup@v1
@@ -54,7 +54,7 @@ See [action.yml](action.yml).
 
 ```yaml
   - name: Checkout repo
-    uses: actions/checkout@v3
+    uses: actions/checkout@v4
 
   - name: Setup/install Steampipe
     uses: turbot/steampipe-action-setup@v1
@@ -86,7 +86,7 @@ See [action.yml](action.yml).
 
 ```yaml
   - name: Checkout repo
-    uses: actions/checkout@v3
+    uses: actions/checkout@v4
 
   - name: Setup Steampipe
     uses: turbot/steampipe-action-setup@v1
@@ -136,7 +136,7 @@ See [action.yml](action.yml).
 
 ```yaml
   - name: Checkout repo
-    uses: actions/checkout@v3
+    uses: actions/checkout@v4
 
   - name: Setup Steampipe
     uses: turbot/steampipe-action-setup@v1
@@ -173,7 +173,7 @@ This example uses an [IAM OIDC identity provider](https://aws.amazon.com/blogs/s
 ```yaml
 steps:
   - name: Checkout repo
-    uses: actions/checkout@v3
+    uses: actions/checkout@v4
 
   - name: Setup AWS Credentials
     uses: aws-actions/configure-aws-credentials@v4
@@ -216,7 +216,7 @@ Snapshot visibility is set by the `pipes-snapshot-visibility` input:
 
 ```yaml
   - name: Checkout repo
-    uses: actions/checkout@v3
+    uses: actions/checkout@v4
 
   - name: Setup AWS Credentials
     uses: aws-actions/configure-aws-credentials@v4
@@ -256,7 +256,7 @@ Snapshot visibility is set by the `pipes-snapshot-visibility` input:
 Connect to a DuckDB backend and run controls.
 
 ```yaml
-  - uses: actions/checkout@v2
+  - uses: actions/checkout@v4
 
   - name: Install Powerpipe
     uses: turbot/powerpipe-action-setup@v1
@@ -281,7 +281,7 @@ Connect to a DuckDB backend and run controls.
 Connect to a SQLite backend and run controls.
 
 ```yaml
-  - uses: actions/checkout@v2
+  - uses: actions/checkout@v4
 
   - name: Install Powerpipe
     uses: turbot/powerpipe-action-setup@v1
