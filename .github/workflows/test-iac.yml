@@ -1,4 +1,5 @@
-name: Test IaC Workflow (Run this workflow manually before Release)
+# Run this workflow manually before Release to ensure that the IaC checks are passing.
+name: Test IaC Checks
 
 on:
   workflow_dispatch:
