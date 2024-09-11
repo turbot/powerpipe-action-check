@@ -1,9 +1,13 @@
 name: Test Workflow
 
-on: [push]
+on:
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
-  run_control:
+  run-control:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +27,7 @@ jobs:
         run: |
           sudo /bin/sh -c "$(curl -fsSL https://powerpipe.io/install/powerpipe.sh)"
 
-      - name: Run
+      - name: Start Steampipe and Powerpipe
         run: |
           steampipe -v
           powerpipe -v
@@ -40,9 +44,9 @@ jobs:
 
       - name: Stop
         run: |
-          steampipe service stop --force
+          steampipe service stop
 
-  run_benchmark:
+  run-benchmark:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -62,7 +66,7 @@ jobs:
         run: |
           sudo /bin/sh -c "$(curl -fsSL https://powerpipe.io/install/powerpipe.sh)"
 
-      - name: Run
+      - name: Start Steampipe and Powerpipe
         run: |
           steampipe -v
           powerpipe -v
@@ -79,9 +83,9 @@ jobs:
 
       - name: Stop
         run: |
-          steampipe service stop --force
+          steampipe service stop
 
-  test_database_flag:
+  test-database-flag:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -90,7 +94,7 @@ jobs:
         run: |
           sudo /bin/sh -c "$(curl -fsSL https://powerpipe.io/install/powerpipe.sh)"
 
-      - name: Run
+      - name: Verify Powerpipe is installed
         run: |
           powerpipe -v
 
@@ -104,7 +108,7 @@ jobs:
           pipes-token: "${{ secrets.PIPES_TOKEN }}"
           database: "duckdb:///$(pwd)/test_data/employee.duckdb"
 
-  run_iac_check:
+  run-iac-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -122,7 +126,7 @@ jobs:
         run: |
           sudo /bin/sh -c "$(curl -fsSL https://powerpipe.io/install/powerpipe.sh)"
 
-      - name: Run
+      - name: Start Steampipe and Powerpipe
         run: |
           steampipe -v
           powerpipe -v
@@ -137,4 +141,4 @@ jobs:
 
       - name: Stop
         run: |
-          steampipe service stop --force
+          steampipe service stop
