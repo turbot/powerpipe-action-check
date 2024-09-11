@@ -4,7 +4,7 @@ author: Turbot
 description: >
   Run Powerpipe mod benchmarks and controls. Create annotations for Infrastructure as Code (IaC) controls.
 branding:
-  color: red
+  color: green
   icon: shield
 inputs:
   mod-url:
@@ -29,11 +29,8 @@ inputs:
   pipes-token:
     description: The Turbot Pipes token used to save snapshots. Can also be set via the PIPES_TOKEN environment variable (https://powerpipe.io/docs/reference/env-vars/pipes_token).
     required: false
-  control-additional-args:
-    description: Space separated args to add to the 'powerpipe control run' command.
-    required: false
-  benchmark-additional-args:
-    description: Space separated args to add to the 'powerpipe benchmark run' command.
+  additional-args:
+    description: Space separated args to add to the 'powerpipe control/benchmark run' command.
     required: false
   artifact-exports:
     description: "Comma separated export types to save as artifacts. Example: 'csv,json'. For all valid formats please see https://powerpipe.io/docs/reference/cli/control#output-formats."
@@ -155,11 +152,11 @@ runs:
         run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 
         # Clear snapshot flags from additional args (should be via input)
-        additional_args=$(echo "${{ inputs.control-additional-args }}" | sed -e "s/--share//g" | sed -e "s/--snapshot//g")
+        additional_args=$(echo "${{ inputs.additional-args }}" | sed -e "s/--share//g" | sed -e "s/--snapshot//g")
 
-        # Allow override for output if set in control-additional-args
+        # Allow override for output if set in additional-args
         control_output="--output=brief"
-        if [[ "${{ inputs.control-additional-args }}" == *"--output"* ]]; then
+        if [[ "${{ inputs.additional-args }}" == *"--output"* ]]; then
           control_output=""
         fi
 
@@ -228,11 +225,11 @@ runs:
         run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 
         # Clear snapshot flags from additional args (should be via input)
-        additional_args=$(echo "${{ inputs.benchmark-additional-args }}" | sed -e "s/--share//g" | sed -e "s/--snapshot//g")
+        additional_args=$(echo "${{ inputs.additional-args }}" | sed -e "s/--share//g" | sed -e "s/--snapshot//g")
 
-        # Allow override for output if set in benchmark-additional-args
+        # Allow override for output if set in additional-args
         benchmark_output="--output=brief"
-        if [[ "${{ inputs.benchmark-additional-args }}" == *"--output"* ]]; then
+        if [[ "${{ inputs.additional-args }}" == *"--output"* ]]; then
           benchmark_output=""
         fi
 
@@ -296,7 +293,7 @@ runs:
           ${{ steps.export-paths.outputs.artifact_paths }}
 
     - name: Setup Node
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
 
     - name: Create annotations(controls)
       shell: bash

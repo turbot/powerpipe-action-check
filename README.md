@@ -24,7 +24,7 @@ See [action.yml](action.yml).
   - name: Checkout repo
     uses: actions/checkout@v4
 
-  - name: Setup/install Steampipe
+  - name: Setup Steampipe
     uses: turbot/steampipe-action-setup@v1
     with:
       plugin-connections: | # setup your steampipe plugin & connections
@@ -42,12 +42,13 @@ See [action.yml](action.yml).
     run: |
       steampipe service start
 
-  - name: Run specific AWS compliance controls
+  - name: Run specific AWS Compliance controls
     uses: turbot/powerpipe-action-check@v1
     with:
       mod-url: https://github.com/turbot/steampipe-mod-aws-compliance
       controls: |
         ebs_volume_unused
+        foundational_security_s3_1
 ```
 
 ### Run specific benchmarks
@@ -56,7 +57,7 @@ See [action.yml](action.yml).
   - name: Checkout repo
     uses: actions/checkout@v4
 
-  - name: Setup/install Steampipe
+  - name: Setup Steampipe
     uses: turbot/steampipe-action-setup@v1
     with:
       plugin-connections: | # setup your steampipe plugin & connections
@@ -74,12 +75,13 @@ See [action.yml](action.yml).
     run: |
       steampipe service start
 
-  - name: Run specific AWS compliance benchmarks
+  - name: Run specific AWS Compliance benchmarks
     uses: turbot/powerpipe-action-check@v1
     with:
       mod-url: https://github.com/turbot/steampipe-mod-aws-compliance
-      controls: |
+      benchmarks: |
         cis_v150
+        foundational_security_s3
 ```
 
 ### Run benchmarks and controls from multiple mods
@@ -121,7 +123,7 @@ See [action.yml](action.yml).
       mod-url: https://github.com/turbot/steampipe-mod-terraform-aws-compliance
       controls: |
         ec2_ebs_default_encryption_enabled
-      control-additional-args: '--search-path-prefix=aws_tf'
+      additional-args: '--search-path-prefix=aws_tf'
 
   - name: Run GCP Terraform Compliance benchmark
     uses: turbot/powerpipe-action-check@v1
@@ -129,7 +131,7 @@ See [action.yml](action.yml).
       mod-url: https://github.com/turbot/steampipe-mod-terraform-gcp-compliance
       benchmarks: |
         compute
-      benchmark-additional-args: '--search-path-prefix=gcp_tf'
+      additional-args: '--search-path-prefix=gcp_tf'
 ```
 
 ### Use a specific tag version of a mod
@@ -154,13 +156,46 @@ See [action.yml](action.yml).
     run: |
       steampipe service start
 
-  - name: Run Terraform AWS Compliance v0.18 controls
+  - name: Run Terraform AWS Compliance v0.18 control
     uses: turbot/steampipe-action-check@v1
     with:
       mod-url: https://github.com/turbot/steampipe-mod-terraform-aws-compliance
       mod-branch: v0.18
       controls: |
         ec2_ebs_default_encryption_enabled
+```
+
+### Run GitHub Compliance checks
+
+This action can also be used to run benchmarks and controls in mods that don't scan IaC configuration files.
+
+```yaml
+  - name: Checkout
+    uses: actions/checkout@v4
+
+  - name: Setup Steampipe
+    uses: turbot/steampipe-action-setup@v1
+    with:
+      plugin-connections: |
+        connection "github" {
+          plugin = "github"
+          token  = "${{ secrets.GITHUB_PAT }}"
+        }
+
+  - name: Install Powerpipe
+    uses: turbot/powerpipe-action-setup@v1
+
+  - name: Start steampipe service # start steampipe service - powerpipe will connect to this running steampipe postgres database
+    run: |
+      steampipe service start
+
+  - name: Run Powerpipe benchmarks
+    uses: turbot/powerpipe-action-check@v1
+    with:
+      mod-url: https://github.com/turbot/steampipe-mod-github-compliance
+      benchmarks: |
+        cis_supply_chain_v100_2
+        cis_supply_chain_v100_2_3
 ```
 
 ### Run AWS CIS v2.0.0 benchmark
@@ -196,7 +231,7 @@ steps:
     run: |
       steampipe service start
 
-  - name: Run Powerpipe benchmarks
+  - name: Run Powerpipe benchmark
     uses: turbot/powerpipe-action-check@v1
     with:
       mod-url: https://github.com/turbot/steampipe-mod-aws-compliance
@@ -249,6 +284,50 @@ Snapshot visibility is set by the `pipes-snapshot-visibility` input:
       pipes-token: ${{ secrets.PIPES_TOKEN }}
 ```
 
+### Pass in Powerpipe variables
+
+Variables can be passed into Powerpipe multiple ways, for more information on how to pass in variables and what order they're loaded in, please see [Passing Input Variables](https://powerpipe.io/docs/build/mod-variables#passing-input-variables).
+
+
+```yaml
+  - name: Checkout repo
+    uses: actions/checkout@v4
+
+  - name: Setup AWS Credentials
+    uses: aws-actions/configure-aws-credentials@v4
+    with:
+      role-to-assume: arn:aws:iam::1234567890:role/my-role
+      aws-region: us-east-1
+
+  - name: Setup Steampipe
+    uses: turbot/steampipe-action-setup@v1
+    with:
+      plugin-connections: |
+        connection "aws" {
+          plugin = "aws"
+        }
+
+  - name: Install Powerpipe
+    uses: turbot/powerpipe-action-setup@v1
+
+  - name: Start steampipe service # start steampipe service - powerpipe will connect to this running steampipe postgres database
+    run: |
+      steampipe service start
+
+  - name: Run AWS Tags benchmarks
+    uses: turbot/powerpipe-action-check@v1
+    env:
+      # Variables can be passed in through env vars
+      PP_VAR_mandatory_tags: '["Application", "Environment", "Department", "Owner"]'
+    with:
+      mod-url: https://github.com/turbot/steampipe-mod-aws-tags
+      benchmarks: |
+        mandatory
+        prohibited
+      # Or with CLI flags
+      additional-args: "--var 'prohibited_tags=[\"Password\", \"Key\"]'"
+```
+
 ## Advanced Examples
 
 ### Run a control against a DuckDB Backend
@@ -261,7 +340,7 @@ Connect to a DuckDB backend and run controls.
   - name: Install Powerpipe
     uses: turbot/powerpipe-action-setup@v1
 
-  - name: Run
+  - name: Run Powerpipe
     run: |
       powerpipe -v
 
@@ -286,7 +365,7 @@ Connect to a SQLite backend and run controls.
   - name: Install Powerpipe
     uses: turbot/powerpipe-action-setup@v1
 
-  - name: Run
+  - name: Run Powerpipe
     run: |
       powerpipe -v
 
@@ -299,6 +378,114 @@ Connect to a SQLite backend and run controls.
       pipes-snapshot-visibility: 'anyone_with_link'
       pipes-token: "${{ secrets.PIPES_TOKEN }}"
       database: "duckdb:///$(pwd)/test_data/employee.db"
+```
+
+### Run checks in a Turbot Pipes workspace
+
+You can execute queries via Turbot Pipes, which is useful if you already have plugin connections setup in your workspaces.
+
+The following example shows how to specify an [implicit workspace](https://powerpipe.io/docs/run/workspaces#implicit-workspaces) within the `additional-args` input.
+
+```yaml
+steps:
+  - name: Checkout
+    uses: actions/checkout@v4
+
+  - name: Setup Steampipe
+    uses: turbot/steampipe-action-setup@v1
+    with:
+      plugin-connections: |
+        connection "aws" {
+          plugin = "aws"
+        }
+
+  - name: Install Powerpipe
+    uses: turbot/powerpipe-action-setup@v1
+
+  - name: Start steampipe service # start steampipe service - powerpipe will connect to this running steampipe postgres database
+    run: |
+      steampipe service start
+
+  - name: Run Powerpipe control
+    uses: turbot/powerpipe-action-check@v1
+    with:
+      mod-url: https://github.com/turbot/steampipe-mod-aws-compliance
+      controls: |
+        ebs_volume_unused
+      pipes-token: ${{ secrets.PIPES_TOKEN }}
+      pipes-snapshot-visibility: workspace
+      # The workspace passed here in format <owner>/<workspace> needs to be accessible by your pipes-token
+      additional-args: '--workspace="username/default"'
+```
+
+You can also set the workspace via the `POWERPIPE_WORKSPACE` environment variable.
+
+```yaml
+  - name: Run Powerpipe control
+    uses: turbot/powerpipe-action-check@v1
+    env:
+      POWERPIPE_WORKSPACE: 'username/default'
+    with:
+      mod-url: https://github.com/turbot/steampipe-mod-aws-compliance
+      controls: |
+        ebs_volume_unused
+      pipes-token: ${{ secrets.PIPES_TOKEN }}
+      pipes-snapshot-visibility: workspace
+```
+
+### Use a matrix to run controls from multiple mods
+
+```yaml
+jobs:
+  powerpipe-terraform-compliance:
+    strategy:
+      matrix:
+        include:
+          - cloud: "aws"
+            control: "ec2_ami_copy_encrypted_with_kms_cmk"
+            search_path: "aws_tf"
+          - cloud: "azure"
+            control: "compute_managed_disk_set_encryption_enabled"
+            search_path: "azure_tf"
+          - cloud: "gcp"
+            control: "compute_disk_encrypted_with_csk"
+            search_path: "gcp_tf"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Steampipe
+        uses: turbot/steampipe-action-setup@v1
+        with:
+          plugin-connections: |
+            connection "aws_tf" {
+              plugin = "terraform"
+              configuration_file_paths = ["cloud_infra/terraform/aws/**/*.tf"]
+            }
+            connection "gcp_tf" {
+              plugin = "terraform"
+              configuration_file_paths = ["cloud_infra/terraform/gcp/**/*.tf"]
+            }
+            connection "azure_tf" {
+              plugin = "terraform"
+              configuration_file_paths = ["cloud_infra/terraform/azure/**/*.tf"]
+            }
+
+      - name: Install Powerpipe
+        uses: turbot/powerpipe-action-setup@v1
+
+      - name: Start steampipe service # start steampipe service - powerpipe will connect to this running steampipe postgres database
+        run: |
+          steampipe service start
+
+      - name: Run Terraform ${{ matrix.cloud }} Compliance
+        uses: turbot/steampipe-action-check@v1
+        with:
+          mod-url: 'https://github.com/turbot/steampipe-mod-terraform-${{ matrix.cloud }}-compliance'
+          controls: |
+            ${{ matrix.control }}
+          additional-args: '--search-path-prefix=${{ matrix.search_path }}'
 ```
 
 ## Helpful links

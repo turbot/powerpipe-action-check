@@ -2,7 +2,7 @@ import { setFailed } from "@actions/core";
 import { processAnnotations } from "./annotate";
 
 // This is the entrypoint of the javascript app that processes the json files
-// from steampipe check to process the annotations.
+// from powerpipe to process the annotations.
 //
 // This app is executed with the list of checks from the input of the action
 // as separate arguments in the argument vector

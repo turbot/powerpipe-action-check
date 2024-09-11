@@ -23,7 +23,7 @@ export async function processAnnotations(input) {
 /**
  * Returns an array of annotations for a RootResult
  *
- * @param group GroupResult The group result returned by `steampipe check`
+ * @param group GroupResult The group result returned by `powerpipe control/benchmark run`
  * @returns
  */
 export function getAnnotations(result) {
