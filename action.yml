@@ -4,7 +4,7 @@ author: Turbot
 description: >
   Run Powerpipe mod benchmarks and controls. Create annotations for Infrastructure as Code (IaC) controls.
 branding:
-  color: red
+  color: green
   icon: shield
 inputs:
   mod-url:
