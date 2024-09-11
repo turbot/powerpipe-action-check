@@ -1,4 +1,4 @@
-name: Test Workflow
+name: Test Non-IaC Checks
 
 on:
   pull_request:
@@ -107,38 +107,3 @@ jobs:
           pipes-snapshot-visibility: 'anyone_with_link'
           pipes-token: "${{ secrets.PIPES_TOKEN }}"
           database: "duckdb:///$(pwd)/test_data/employee.duckdb"
-
-  run-iac-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Steampipe
-        uses: turbot/steampipe-action-setup@v1
-        with:
-          plugin-connections: |
-            connection "aws_tf" {
-              plugin = "terraform"
-              configuration_file_paths = [ "./test_data/terraform/aws/**/*.tf" ]
-            }
-
-      - name: Install Powerpipe
-        run: |
-          sudo /bin/sh -c "$(curl -fsSL https://powerpipe.io/install/powerpipe.sh)"
-
-      - name: Start Steampipe and Powerpipe
-        run: |
-          steampipe -v
-          powerpipe -v
-          steampipe service start
-
-      - name: Run Terraform checks
-        uses: ./ # This points to your local action
-        with:
-          mod-url: "https://github.com/turbot/steampipe-mod-terraform-aws-compliance"
-          controls: |
-            ec2_instance_uses_imdsv2
-
-      - name: Stop
-        run: |
-          steampipe service stop
