@@ -138,7 +138,6 @@ jobs:
           mod-url: "https://github.com/turbot/steampipe-mod-terraform-aws-compliance"
           controls: |
             ec2_instance_uses_imdsv2
-        continue-on-error: true  # Add this to allow passing even when checks fail
 
       - name: Stop
         run: |
