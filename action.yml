@@ -182,10 +182,8 @@ runs:
 
         # Run control command
         if [[ -n "${{ steps.get-database.outputs.database }}" ]]; then
-          echo "Running >> powerpipe control run ${{ steps.get-controls.outputs.run_list }} $control_output $control_exports --database=${{ steps.get-database.outputs.database }} --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log"
           powerpipe control run ${{ steps.get-controls.outputs.run_list }} $control_output $control_exports --database=${{ steps.get-database.outputs.database }} --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log
         else
-          echo " Running >> powerpipe control run ${{ steps.get-controls.outputs.run_list }} $control_output $control_exports --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log"
           powerpipe control run ${{ steps.get-controls.outputs.run_list }} $control_output $control_exports --mod-location=${{ steps.make-temp-dir.outputs.tmp-mod-dir }} $snapshot_type $pipes_inputs $additional_args | tee /tmp/output.log
         fi
         
