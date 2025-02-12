@@ -14,14 +14,6 @@ jobs:
 
       - name: Install Steampipe
         uses: turbot/steampipe-action-setup@v1
-        with:
-          plugin-connections: |
-            connection "aws" {
-              plugin     = "aws"
-              access_key = "${{ secrets.AWS_ACCESS_KEY_ID }}"
-              secret_key = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-              regions    = ["ap-south-1"]
-            }
 
       - name: Install Powerpipe
         run: |
@@ -36,11 +28,9 @@ jobs:
       - name: Run Control
         uses: ./ # This points to your local action
         with:
-          mod-url: "https://github.com/turbot/steampipe-mod-aws-compliance"
+          mod-url: "https://github.com/pskrbasu/powerpipe-demo-mod"
           controls: |
-            ebs_volume_unused
-          pipes-snapshot-visibility: 'anyone_with_link'
-          pipes-token: "${{ secrets.PIPES_TOKEN }}"
+            sample_control_1
 
       - name: Stop
         run: |
@@ -53,14 +43,6 @@ jobs:
 
       - name: Install Steampipe
         uses: turbot/steampipe-action-setup@v1
-        with:
-          plugin-connections: |
-            connection "aws" {
-              plugin     = "aws"
-              access_key = "${{ secrets.AWS_ACCESS_KEY_ID }}"
-              secret_key = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-              regions    = ["ap-south-1"]
-            }
 
       - name: Install Powerpipe
         run: |
@@ -75,11 +57,9 @@ jobs:
       - name: Run Benchmark
         uses: ./ # This points to your local action
         with:
-          mod-url: "https://github.com/turbot/steampipe-mod-aws-compliance"
+          mod-url: "https://github.com/pskrbasu/powerpipe-demo-mod"
           benchmarks: |
-            cis_v150
-          pipes-snapshot-visibility: 'anyone_with_link'
-          pipes-token: "${{ secrets.PIPES_TOKEN }}"
+            control_summary_benchmark
 
       - name: Stop
         run: |
