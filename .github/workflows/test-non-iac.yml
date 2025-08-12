@@ -10,7 +10,7 @@ jobs:
   run-control:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Steampipe
         uses: turbot/steampipe-action-setup@v1
@@ -39,7 +39,7 @@ jobs:
   run-benchmark:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Steampipe
         uses: turbot/steampipe-action-setup@v1
@@ -68,7 +68,7 @@ jobs:
   test-database-flag:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Powerpipe
         run: |
