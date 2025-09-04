@@ -293,7 +293,7 @@ runs:
           ${{ steps.export-paths.outputs.artifact_paths }}
 
     - name: Setup Node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
 
     - name: Create annotations(controls)
       shell: bash
