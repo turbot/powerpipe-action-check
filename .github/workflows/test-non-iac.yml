@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   run-control:
     runs-on: ubuntu-latest
@@ -13,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Steampipe
-        uses: turbot/steampipe-action-setup@v1
+        uses: turbot/steampipe-action-setup@48bd85e67fddae9843fe2ad7ef6af96a332507c5 # v1
 
       - name: Install Powerpipe
         run: |
@@ -42,7 +45,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Steampipe
-        uses: turbot/steampipe-action-setup@v1
+        uses: turbot/steampipe-action-setup@48bd85e67fddae9843fe2ad7ef6af96a332507c5 # v1
 
       - name: Install Powerpipe
         run: |
